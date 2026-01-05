@@ -160,7 +160,7 @@
 			position: relative;
 		}
 
-		button:active {
+		button:active:not(:disabled) {
 			transform: scale(0.96);
 		}
 
@@ -584,14 +584,24 @@
 		}
 	}
 
-	function playBuffer(buffer) {
+	function playBuffer(buffer, clickedBtn, labelText, iconClass) {
 		if (!buffer) return;
 
 		// Stop any currently playing audio
 		if (currentAudioSource) {
 			try { currentAudioSource.stop(); } catch (e) { }
-			currentAudioSource = null;
+			return;
 		}
+
+		clickedBtn.innerHTML = `<span class="icon icon-stop"></span> Stop`;
+		clickedBtn.classList.add('playing');
+
+		if (clickedBtn === btnPlay) {
+			btnPlayReverse.disabled = true;
+		} else {
+			btnPlay.disabled = true;
+		}
+		btnRecord.disabled = true;
 
 		// Create Source
 		const source = audioCtx.createBufferSource();
@@ -620,14 +630,28 @@
 		currentAudioSource = source;
 
 		setStatus("playback");
+
 		source.onended = () => {
 			setStatus("processed");
 			currentAudioSource = null;
+
+			clickedBtn.innerHTML = `<span class="icon ${iconClass}"></span> ${labelText}`;
+			clickedBtn.classList.remove('playing');
+
+			// Re-enable all controls
+			btnPlay.disabled = false;
+			btnPlayReverse.disabled = false;
+			btnRecord.disabled = false;
 		};
 	}
 
-	btnPlay.addEventListener("click", () => playBuffer(currentBuffer));
-	btnPlayReverse.addEventListener("click", () => playBuffer(reversedBuffer));
+	btnPlay.addEventListener("click", () => {
+		playBuffer(currentBuffer, btnPlay, "Přehrát", "icon-play");
+	});
+
+	btnPlayReverse.addEventListener("click", () => {
+		playBuffer(reversedBuffer, btnPlayReverse, "Přehrát pozpátku", "icon-play-reverse");
+	});
 
 	function downloadBuffer(buffer, filename) {
 		if (!buffer) return;
