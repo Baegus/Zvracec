@@ -325,7 +325,7 @@
 	const chkUpper = getID("chk-upper");
 	const chkLower = getID("chk-lower");
 
-	// Textaarea auto-resize variables
+	// Textarea auto-resize variables
 	let userResizedOutput = false;
 	let lastAutoHeight = 0;
 
@@ -403,6 +403,10 @@
 
 		// Phonetic adjustment (Before case change, but with case detection)
 		if (chkPhonetic.checked) {
+			// Replace "v" with "f" at the end of words
+			txt = txt.replace(/v(?![a-z\u00C0-\u024F])/gi, (match) => {
+				return match === "V" ? "F" : "f";
+			});
 			phoneticMap.forEach(([search, replace]) => {
 				if (search == "ch" && !chkReverse.checked) return;
 				const regex = new RegExp(search, "gi");
