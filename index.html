@@ -88,6 +88,11 @@
 			cursor: pointer;
 		}
 
+		.input-wrapper {
+			position: relative;
+			width: 100%;
+		}
+
 		/* Text area */
 		textarea {
 			width: 100%;
@@ -98,6 +103,7 @@
 			border: 1px solid #333;
 			border-radius: 8px;
 			padding: 15px;
+			padding-right: 40px;
 			font-size: 1.2rem;
 			line-height: 1.4;
 			resize: vertical;
@@ -119,6 +125,35 @@
 			border: 1px dashed var(--accent-color);
 			color: var(--accent-color);
 			font-weight: 500;
+			padding-right: 15px;
+		}
+		#btn-clear {
+			position: absolute;
+			top: 9px;
+			right: -31px;
+			width: 32px;
+			height: 32px;
+			min-width: 0;
+			padding: 3px 0 0 0;
+			border-radius: 4px;
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+			font-size: 1.4rem;
+			line-height: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: var(--surface-color);
+			border: 1px solid #444;
+			border-left-width: 0px;
+			color: #777;
+			z-index: 5;
+		}
+
+		#btn-clear:hover {
+			border-color: var(--accent-color);
+			color: var(--accent-color);
+			background-color: #2a2a2a;
 		}
 
 		/* Audio section */
@@ -259,6 +294,18 @@
 			border-top: 6px solid currentColor;
 		}
 
+		@media(max-width: 685px) {
+			#btn-clear {
+				top: -31px;
+				right: 9px;
+				border-radius: 4px;
+				border-bottom-width: 0px;
+				border-left-width: 1px;
+				border-bottom-right-radius: 0;
+				border-bottom-left-radius: 0;
+			}
+		}
+
 		@media(max-width: 480px) {
 			button {
 				font-size: 0.8rem;
@@ -287,7 +334,10 @@
 		</div>
 
 		<!-- Input / Output -->
-		<textarea id="input-text" placeholder="Sem napiš text..."></textarea>
+		<div class="input-wrapper">
+			<textarea id="input-text" placeholder="Sem napiš text..."></textarea>
+			<button id="btn-clear" title="Vymazat text" style="display: none;">×</button>
+		</div>
 		<textarea id="output-text" placeholder="Výsledek uvidíš zde." readonly></textarea>
 
 		<!-- Audio section -->
@@ -401,6 +451,13 @@
 	function processText() {
 		let txt = inputText.value;
 
+		// Toggle Clear Button Visibility
+		if (txt.length > 0) {
+			btnClear.style.display = "flex";
+		} else {
+			btnClear.style.display = "none";
+		}
+
 		// Phonetic adjustment (Before case change, but with case detection)
 		if (chkPhonetic.checked) {
 			// Replace "v" with "f" at the end of words
@@ -436,6 +493,14 @@
 		outputText.value = txt.trim();
 		setTextareaHeight(outputText);
 	}
+
+	// Clear button functionality
+	btnClear.addEventListener("click", () => {
+		inputText.value = "";
+		processText();
+		saveToLocalStorage();
+		inputText.focus();
+	});
 
 
 	/* --- AUDIO SECTION --- */
