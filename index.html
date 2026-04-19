@@ -449,6 +449,15 @@
 		return text.toLowerCase();
 	}
 
+	// List of letter pairs that should not be split when splitting long words (in both orders)
+	const noSplit = [
+		"ch", "hc", "ťš", "šť", "ts", "st", "ks", "sk", "kv", "vk",
+		"mň", "ňm", "pj", "jp", "vj", "jv", "bj", "jb", "fj", "jf",
+		"ďy", "yď", "ťy", "yť", "ňy", "yň", "ďý", "ýď", "ťý", "ýť",
+		"ňý", "ýň", "ďe", "eď", "ťe", "eť", "ňe", "eň",
+		"dž", "žd", "dz", "zd", "ou", "uo", "au", "ua", "eu", "ue"
+	];
+
 	function processText() {
 		let txt = inputText.value;
 
@@ -481,8 +490,38 @@
 		// Split long words
 		if (chkSplit.checked) {
 			txt = txt.replace(/\S{7,}/g, (word) => {
-				const mid = Math.floor(word.length / 2);
-				return word.slice(0, mid) + "-" + word.slice(mid);
+				let mid = Math.floor(word.length / 2);
+				let safeMid = mid;
+
+				// Shift the center to the right if it falls in the middle of a no-split pair
+				while (safeMid < word.length - 1) {
+					let pair = word.slice(safeMid - 1, safeMid + 1).toLowerCase();
+					if (noSplit.includes(pair)) {
+						safeMid++;
+					} else {
+						break;
+					}
+				}
+
+				// If shifting right goes too far, try shifting left from the original center
+				if (safeMid >= word.length - 1) {
+					safeMid = mid;
+					while (safeMid > 1) {
+						let pair = word.slice(safeMid - 1, safeMid + 1).toLowerCase();
+						if (noSplit.includes(pair)) {
+							safeMid--;
+						} else {
+							break;
+						}
+					}
+				}
+
+				// If both shifts go out of bounds, just split in the middle
+				if (safeMid <= 1 || safeMid >= word.length - 1) {
+					safeMid = mid;
+				}
+
+				return word.slice(0, safeMid) + "-" + word.slice(safeMid);
 			});
 		}
 
